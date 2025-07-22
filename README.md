@@ -34,6 +34,9 @@ This is a sample **frontend-only** version of the **LearnHive** project – an i
 
 This is a **UI sample only** for demonstration and review purposes. It does not include backend, database, or authentication logic. It's useful for UI feedback, portfolio review, or reference before full integration.
 
+> Note: Since this is a frontend-only project and each module embeds its own CSS/JS within HTML files, GitHub may show 100% HTML. In reality, the project heavily uses **JavaScript and CSS** across 15 modules.
+
+
 ---
 
 ## 👩‍💻 Developed by
