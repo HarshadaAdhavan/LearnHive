@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Debug the Java Code</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/clike/clike.min.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      text-align: center;
+      padding: 0;
+      margin: 0;
+    }
+
+    header {
+      background-color: #710909;
+      padding: 12px;
+      color: white;
+      font-size: 28px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 800px;
+      margin: 20px auto;
+      position: relative;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .CodeMirror {
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      text-align: left;
+      font-size: 15px;
+    }
+
+    .buttons {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      opacity: 0.9;
+    }
+
+    .check, .clue {
+      background-color: #710909;
+      color: white;
+    }
+
+    .next, .finish {
+      background-color: #28a745;
+      color: white;
+      display: none;
+    }
+
+    .message {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    .correct {
+      color: green;
+    }
+
+    .wrong {
+      color: red;
+    }
+
+    .header-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .header-section .question-text {
+      flex-grow: 1;
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+
+    .change-count-button {
+      border: 2px solid #710909;
+      background-color: #fffbe6;
+      color: black;
+      font-weight: bold;
+      padding: 10px 15px;
+      border-radius: 8px;
+      cursor: default;
+      transition: all 0.2s ease;
+    }
+
+    .timer {
+      font-size: 16px;
+      font-weight: bold;
+      color: black;
+      padding: 10px 20px;
+      border: 2px solid #710909;
+      border-radius: 8px;
+      background-color: #fffbe6;
+    }
+
+    .timer:hover {
+      background-color: #fffbe6;
+      transform: scale(1.05);
+      transition: all 0.3s ease;
+    }
+
+    .timer.warning {
+      background-color: #ffe5e5;
+      border-color: red;
+      color: red;
+    }
+
+    @keyframes slideFadeIn {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .clue-box {
+      margin-top: 8px;
+      padding: 10px 12px;
+      border: 2px solid #710909;
+      background-color: #fffbe6;
+      border-radius: 10px;
+      color: #333;
+      font-weight: bold;
+      font-size: 16px;
+      display: inline-block;
+      animation: slideFadeIn 0.5s ease-out forwards;
+    }
+  </style>
+</head>
+<body>
+  <header>Debug the Java Code</header>
+
+  <div class="card">
+    <div class="header-section">
+      <button id="changesCount" class="change-count-button"></button>
+      <div style="flex-grow: 1; text-align: center;">
+        <p class="question-text" id="question"></p>
+        <div id="clueMessage" class="message"></div>
+      </div>
+      <p class="timer">Time Left: <span id="time">5:00</span></p>
+    </div>
+
+    <textarea id="codeArea"></textarea>
+
+    <div class="buttons">
+      <button class="check" onclick="checkAnswer()">Check</button>
+      <button class="clue" onclick="showClue()">Clue</button>
+      <button class="next" onclick="nextQuestion()">Next</button>
+      <button class="finish" onclick="finishQuiz()">Finish</button>
+    </div>
+
+    <p id="message" class="message"></p>
+  </div>
+
+  <script>
+    const questions = [
+  {
+    question: "Static Methods Cannot Be Overridden",
+    changes: 2,
+    buggyCode: `class Parent {
+    static void display() { System.out.println("Static method in Parent"); }
+}
+class Child extend Parent {
+    void display() { System.out.println("Static method in Child"); }
+    
+    public static void main(String[] args) {
+        Parent obj = new Child();
+        obj.display();
+    }
+}`,
+    correctCode: `class Parent {
+    static void display() { System.out.println("Static method in Parent"); }
+}
+class Child extends Parent {
+    static void display() { System.out.println("Static method in Child"); }
+    
+    public static void main(String[] args) {
+        Parent obj = new Child();
+        obj.display();
+    }
+}`,
+    clues: ["Change method return type in Child."]
+  },
+  {
+    question: "Abstract Methods Must Be Implemented",
+    changes: 2,
+    buggyCode: `abstract class Shape {
+    abstract void draw();
+}
+class Circle extends Shape {
+
+    public static void main(String[] args) {
+        Shape obj = new Circle();
+        obj.draw();
+    }
+}`,
+    correctCode: `abstract class Shape {
+    abstract void draw();
+}
+class Circle extends Shape {
+    void draw() { System.out.println("Drawing Circle"); }
+
+    public static void main(String[] args) {
+        Shape obj = new Circle();
+        obj.draw();
+    }
+}`,
+    clues: ["Abstract methods must be implemented in the subclass."]
+  }
+];
+
+
+    let currentQuestion = 0, clueIndex = 0, timeLeft = 300, timerInterval;
+
+    let editor = CodeMirror.fromTextArea(document.getElementById("codeArea"), {
+      mode: "text/x-java",
+      lineNumbers: true,
+      theme: "default"
+    });
+
+    function normalizeCode(code) {
+      return code.replace(/\s+/g, '').trim();
+    }
+
+    function startTimer() {
+      timeLeft = 300;
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        let minutes = Math.floor(timeLeft / 60);
+        let seconds = timeLeft % 60;
+        let timeText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        const timerEl = document.getElementById("time");
+        timerEl.textContent = timeText;
+
+        const timerBox = document.querySelector(".timer");
+        if (timeLeft < 60) {
+          timerBox.classList.add("warning");
+        } else {
+          timerBox.classList.remove("warning");
+        }
+
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          nextQuestion();
+        }
+
+        timeLeft--;
+      }, 1000);
+    }
+
+    function loadQuestion() {
+      let q = questions[currentQuestion];
+      document.getElementById("question").innerText = q.question;
+      document.getElementById("changesCount").innerText = `Changes Required: ${q.changes}`;
+      editor.setValue(q.buggyCode);
+      document.getElementById("message").innerText = "";
+      document.getElementById("clueMessage").innerHTML = "";
+      clueIndex = 0;
+      document.querySelector(".next").style.display = "none";
+      document.querySelector(".finish").style.display = "none";
+      startTimer();
+    }
+
+    function checkAnswer() {
+      let userCode = normalizeCode(editor.getValue());
+      let correctCode = normalizeCode(questions[currentQuestion].correctCode);
+      let message = document.getElementById("message");
+
+      if (userCode === correctCode) {
+        message.innerText = "Correct! ✅";
+        message.className = "message correct";
+        document.querySelector(".next").style.display = currentQuestion < questions.length - 1 ? "inline-block" : "none";
+        document.querySelector(".finish").style.display = currentQuestion === questions.length - 1 ? "inline-block" : "none";
+        clearInterval(timerInterval);
+      } else {
+        message.innerText = "Incorrect. Try again! ❌";
+        message.className = "message wrong";
+      }
+    }
+
+    function showClue() {
+      const clueDiv = document.getElementById("clueMessage");
+      if (clueIndex < questions[currentQuestion].clues.length) {
+        clueDiv.innerHTML = `<div class="clue-box">${questions[currentQuestion].clues[clueIndex]}</div>`;
+        clueIndex++;
+      } else {
+        clueDiv.innerHTML = `<div class="clue-box">No more clues available.</div>`;
+      }
+    }
+
+    function nextQuestion() {
+      if (currentQuestion < questions.length - 1) {
+        currentQuestion++;
+        loadQuestion();
+      } else {
+        finishQuiz();
+      }
+    }
+
+    function finishQuiz() {
+      clearInterval(timerInterval);
+      window.location.href = "leveljava.html";
+    }
+
+    loadQuestion();
+  </script>
+</body>
+</html>

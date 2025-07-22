@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Module 1</title>
+
+  <!-- Prism.js for syntax highlighting -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #f2f2f2;
+      font-family: 'Segoe UI', sans-serif;
+      overflow-x: hidden;
+    }
+
+    .sidebar {
+      width: 250px;
+      background: #2f2f2f;
+      color: white;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      padding: 60px 20px 20px;
+      overflow-y: auto;
+      transition: transform 0.5s ease, opacity 0.3s;
+      z-index: 999;
+    }
+
+    .sidebar.hidden {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+
+    .sidebar h3 {
+      margin-top: 0;
+      font-size: 20px;
+      margin-bottom: 15px;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .sidebar ul li {
+      margin: 10px 0;
+      cursor: pointer;
+      transition: color 0.3s, transform 0.3s;
+    }
+
+    .sidebar ul li:hover {
+      color: #ff6b6b;
+      transform: translateX(5px);
+    }
+
+    .sidebar-toggle {
+      position: fixed;
+      top: 6px;
+      left: 15px;
+      z-index: 1001;
+      background: #710909;
+      border: none;
+      color: white;
+      font-size: 22px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .sidebar-toggle:hover {
+      background: #520606;
+    }
+
+    .sticky-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: #710909;
+      color: white;
+      padding: 15px 30px 15px 270px; /* default padding-left to account for sidebar */
+      font-size: 22px;
+      z-index: 998;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: padding-left 0.3s ease-in-out;
+    }
+
+    .sticky-header.collapsed {
+      padding-left: 70px;
+    }
+
+    .site-container {
+      margin-left: 0;
+      margin-top: 100px;
+      padding-left: 270px; /* match with .sticky-header */
+      transition: padding-left 0.5s ease;
+    }
+
+    .site-container.full {
+      padding-left: 20px;
+    }
+
+    .sticky-header.full {
+      padding-left: 70px;
+    }
+
+    .card-container {
+      width: 720px;
+      max-width: 90%;
+      margin: auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 0.6s ease forwards;
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .header-with-progress {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    #concept-title {
+      font-size: 20px;
+      color: white;
+      background: #710909;
+      padding: 15px;
+      border-radius: 12px;
+      border-left: 6px solid #000000;
+      flex: 1;
+      margin-right: 20px;
+      transition: background 0.4s ease;
+    }
+
+    .progress-circle {
+      width: 50px;
+      height: 50px;
+      background: conic-gradient(#710909 var(--progress), #e0e0e0 0);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: #ffffff;
+      transition: all 0.4s ease;
+    }
+
+    
+
+    #concept-description {
+      font-size: 18px;
+      text-align: left;
+      color: #444;
+      margin-top: 10px;
+      max-height: 24px;
+      overflow: hidden;
+      transition: max-height 0.4s ease, opacity 0.4s ease;
+      opacity: 0.9;
+    }
+
+    #concept-description.expanded {
+      max-height: 500px;
+      opacity: 1;
+    }
+
+    #view-more-btn {
+      color: #710909;
+      background: none;
+      border: none;
+      font-size: 14px;
+      cursor: pointer;
+      padding: 0;
+      margin-top: 5px;
+      display: block;
+      text-align: left;
+      transition: color 0.3s;
+    }
+
+    #view-more-btn:hover {
+      color: #3e2723;
+    }
+
+    pre {
+      background-color: #fefaf5;
+      padding: 15px;
+      border-radius: 10px;
+      overflow-x: auto;
+      margin-top: 15px;
+      text-align: left;
+      white-space: pre-wrap;
+      word-break: break-word;
+      transition: background 0.3s;
+    }
+
+    #concept-output {
+      background-color: #f0f0f0;
+      color: #000;
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 15px;
+      font-family: monospace;
+      text-align: left;
+      white-space: pre-wrap;
+      transition: background 0.3s;
+    }
+
+    code {
+      font-family: 'Fira Code', monospace;
+      font-size: 14px;
+    }
+
+    .button-container {
+      display: flex;
+      justify-content: space-between;
+      margin-top: auto;
+    }
+
+    .nav-button {
+      background-color: #710909;
+      color: #fff;
+      padding: 12px 30px;
+      margin-top: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.3s;
+    }
+
+    .nav-button:hover {
+      background-color: #3e2723;
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body>
+  <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+
+  <div class="sidebar" id="sidebar">
+    <h3>Function Topics</h3>
+    <ul id="sidebar-nav"></ul>
+  </div>
+
+  <div class="sticky-header" id="header">
+    Java Functions Module
+  </div>
+
+  <div class="site-container" id="main-content">
+    <div class="card-container" id="concept-card">
+      <div class="header-with-progress">
+        <h2 id="concept-title"></h2>
+        <div class="progress-circle" id="progress-circle" style="--progress: 0deg">0%</div>
+      </div>
+      <p id="concept-description"></p>
+      <button id="view-more-btn" onclick="toggleDescription()">View More</button>
+      <pre><code id="concept-code" class="language-java"></code></pre>
+      <div id="concept-output"></div>
+
+      <div class="button-container">
+        <button class="nav-button" id="prev-button" onclick="prevConcept()">Previous</button>
+        <button class="nav-button" id="next-button">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+const overloadingConcepts = [
+    {
+        title: "Function Declaration and Definition",
+        description: "Declaration specifies function signature. Definition includes the function body.",
+        code: `int add(int a, int b);  // Declaration
+int add(int a, int b) { return a + b; }  // Definition`,
+        output: "If you call add(5, 3), the output will be: 8"
+    },
+    {
+        title: "Abstract Functions",
+        description: "Declared without implementation in abstract classes. Implemented by subclasses.",
+        code: `abstract class Shape {
+    abstract void draw();
+}
+class Circle extends Shape {
+    void draw() { System.out.println("Drawing Circle"); }
+}`,
+        output: "If you create a Circle object and call draw(), the output will be: Drawing Circle"
+    },
+    {
+        title: "Default Methods (Interfaces)",
+        description: "Methods with implementations in interfaces. Can be overridden by implementing classes.",
+        code: `interface Drawable {
+    default void draw() { System.out.println("Drawing"); }
+}`,
+        output: "If a class implements Drawable and calls draw(), the output will be: Drawing"
+    }
+];
+
+
+
+    let currentIndex = 0;
+    let isExpanded = false;
+
+    function renderConcept() {
+      const concept = overloadingConcepts[currentIndex];
+      document.getElementById("concept-title").textContent = `${currentIndex + 1}. ${concept.title}`;
+
+      const fullDesc = concept.description;
+      const shortDesc = fullDesc.split('. ').slice(0, 1).join('. ') + '.';
+      const descElem = document.getElementById("concept-description");
+      descElem.textContent = isExpanded ? fullDesc : shortDesc;
+      descElem.className = isExpanded ? 'expanded' : '';
+      document.getElementById("view-more-btn").textContent = isExpanded ? "View Less" : "View More";
+
+      document.getElementById("concept-code").textContent = concept.code;
+      document.getElementById("concept-output").textContent = concept.output;
+      Prism.highlightAll();
+
+      const progressPercent = Math.round(((currentIndex + 1) / overloadingConcepts.length) * 100);
+      const angle = (progressPercent / 100) * 360;
+      const circle = document.getElementById("progress-circle");
+      circle.style.setProperty("--progress", `${angle}deg`);
+      circle.textContent = `${progressPercent}%`;
+
+      const nextButton = document.getElementById("next-button");
+      if (currentIndex === overloadingConcepts.length - 1) {
+        nextButton.textContent = "Finish";
+        nextButton.onclick = () => {
+          const card = document.querySelector(".card-container");
+          card.style.opacity = 0;
+          card.style.transform = "translateY(30px)";
+          setTimeout(() => {
+            window.location.href = "sample-quiz.html";
+          }, 500);
+        };
+      } else {
+        nextButton.textContent = "Next";
+        nextButton.onclick = nextConcept;
+      }
+
+      document.getElementById("prev-button").disabled = currentIndex === 0;
+
+      document.querySelectorAll("#sidebar-nav li").forEach((li, index) => {
+        li.style.fontWeight = index === currentIndex ? "bold" : "normal";
+      });
+    }
+
+    function nextConcept() {
+      if (currentIndex < overloadingConcepts.length - 1) {
+        currentIndex++;
+        isExpanded = false;
+        renderConcept();
+      }
+    }
+
+    function prevConcept() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        isExpanded = false;
+        renderConcept();
+      }
+    }
+
+    function toggleDescription() {
+      isExpanded = !isExpanded;
+      renderConcept();
+    }
+
+    function initSidebar() {
+      const nav = document.getElementById("sidebar-nav");
+      overloadingConcepts.forEach((concept, index) => {
+        const li = document.createElement("li");
+        li.textContent = concept.title;
+        li.onclick = () => {
+          currentIndex = index;
+          isExpanded = false;
+          renderConcept();
+        };
+        nav.appendChild(li);
+      });
+    }
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById("sidebar");
+      const main = document.getElementById("main-content");
+      const header = document.getElementById("header");
+
+      const isHidden = sidebar.classList.toggle("hidden");
+      main.classList.toggle("full", isHidden);
+      header.classList.toggle("full", isHidden);
+    }
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "ArrowRight") nextConcept();
+      else if (event.key === "ArrowLeft") prevConcept();
+    });
+
+    initSidebar();
+    renderConcept();
+  </script>
+</body>
+</html>
