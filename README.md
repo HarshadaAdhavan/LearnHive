@@ -7,9 +7,9 @@ This is a sample **frontend-only** version of the **LearnHive** project – an i
 ## 📚 Modules Included
 
 - 🏠 **Home Page** (`index.html`)
-- 📘 **Lessons Module** (`lessons.html`)
-- 🧠 **Quiz Module** (`quiz.html`)
-- 👨‍💻 **Practice Coding Module** (`practice.html`) *(if available)*
+- 📘 **Lessons Module** 
+- 🧠 **Quiz Module** 
+- 👨‍💻 **Practice Coding Module** (drag and drop module,debugging module) 
 - 🛠️ **Common Styling & Scripts**
 
 ---
@@ -38,5 +38,5 @@ This is a **UI sample only** for demonstration and review purposes. It does not 
 
 ## 👩‍💻 Developed by
 
-**Harshada A**  
+**Harshada A and team**  
 Project: LearnHive  
